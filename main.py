@@ -51,8 +51,8 @@ def distribution (df):
     column = st.selectbox('select column' , [i for i in df.columns if i != 'names'])
     unique_count = st.select_slider('select number of unique count',[i for i in range(len(df[column].value_counts())+1)] , len(df[column].value_counts().index)//5)
     fig = make_subplots(rows = 1 , cols = 2 , subplot_titles=('countplot','percentage'), specs=[[{"type": "xy"}, {'type': 'domain'}]])
-    x = df[column].value_counts().values
-    y = df[column].value_counts().index
+    y = df[column].value_counts().values
+    x = df[column].value_counts().index
 
 
     
@@ -66,7 +66,7 @@ def distribution (df):
                          ),row = 1 ,col = 1)
     
     fig.add_trace(go.Pie(values = x[0:unique_count] ,
-                    labels=y[0:unique_count],       
+                    labels=x[0:unique_count],       
                     textposition='auto',
                     hoverinfo='label',
                     
@@ -80,8 +80,16 @@ def distribution (df):
                  'xanchor' : 'center',
                   'yanchor' : 'top'},
                   template = 'plotly_dark')
-    st.plotly_chart(fig)
+    
     st.plotly_chart(fig)
     st.text( df[column].value_counts().index[:unique_count])
 
+
+def type_of_movie(df):
+    selected_type = st.selectbox('select type of movie' , [i for i in df['genre'].unique()])
+    type_movie = df[df['genre'] == selected_type]
+    st.dataframe(type_movie)
+
 distribution(df)
+
+type_of_movie(df)
