@@ -4,15 +4,17 @@ import numpy as np
 import plotly.graph_objects as go 
 from plotly.subplots import make_subplots 
 import colorlover as cl
-import plotly.colors as pc
+import plotly.colors as plc
+import colorsys
 
-# color_palette = cl.scales['12']['qual']['Set3']
+# Define the number of colors needed (up to 20,000)
+num_colors = 20000
 
-# # Generate a color palette with more than 20,000 colors
-# color_palette = cl.interp(cl.scales['11']['div']['RdYlBu'], 20000)
+# Generate the color palette
+color_palette = plc.qualitative.Plotly * (num_colors // len(plc.qualitative.Plotly) + 1)
 
-# # Convert color values to RGB format
-# color_palette_rgb = [pc.to_rgb(c) for c in color_palette]
+# Trim the color palette to the desired number of colors
+color_palette = color_palette[:num_colors]
 
 df = pd.read_csv('imdb_movies.csv')
 df = df.dropna()
@@ -70,16 +72,16 @@ def distribution (df):
                          y = y[0:unique_count],
                          textposition='auto',
                          marker = dict(
-                                        color = colors, 
+                                        color = color_palette, 
                                         line = dict(color = 'black',width = 0.1))
                          ),row = 1 ,col = 1)
     
-    fig.add_trace(go.Pie(values = x[0:unique_count] ,
+    fig.add_trace(go.Pie(values = y[0:unique_count] ,
                     labels=x[0:unique_count],       
                     textposition='auto',
                     hoverinfo='label',
                     
-                    ),row = 1 , col = 2)
+                    marker = dict(colors = color_palette)),row = 1 , col = 2)
     
 
     fig.update_layout(
