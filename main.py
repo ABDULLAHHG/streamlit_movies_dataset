@@ -3,6 +3,16 @@ import streamlit as st
 import numpy as np 
 import plotly.graph_objects as go 
 from plotly.subplots import make_subplots 
+import colorlover as cl
+import plotly.colors as pc
+
+# color_palette = cl.scales['12']['qual']['Set3']
+
+# # Generate a color palette with more than 20,000 colors
+# color_palette = cl.interp(cl.scales['11']['div']['RdYlBu'], 20000)
+
+# # Convert color values to RGB format
+# color_palette_rgb = [pc.to_rgb(c) for c in color_palette]
 
 df = pd.read_csv('imdb_movies.csv')
 df = df.dropna()
@@ -10,7 +20,6 @@ df['date_x'] = pd.to_datetime(df['date_x'])
 df['year'] = df['date_x'].dt.year
 df = df.set_index('date_x')
 st.dataframe(df)
-st.dataframe(df[df['genre'] == 'Action'])
 
  
 
@@ -90,6 +99,35 @@ def type_of_movie(df):
     type_movie = df[df['genre'] == selected_type]
     st.dataframe(type_movie)
 
-distribution(df)
+distrobox = st.checkbox('Distroplot for columns')
+if distrobox == 1:
+    distribution(df)
 
 type_of_movie(df)
+st.dataframe(df.year.value_counts())
+
+def compare_multi_column(df):
+    layout = dict(title = 'age and Number of Children vs Income', xaxis = dict(title = 'Income' , ticklen = 5))
+    list_to_plot = []
+    fig = dict(layout = layout)
+
+    for c ,i in enumerate(sorted(df.year.value_counts().index[0:11] , reverse=True)):
+        checkbox = st.checkbox(str(i))
+        if checkbox:
+            variable_name = f"{i}"
+            locals()[variable_name] = go.Scatter(
+                x = df[df.year == i]['budget_x'] ,
+                y = df[df.year == i]['revenue'] ,
+                mode = 'markers',
+                name = f'{i}',
+                marker = dict(color = colors[c]))
+            
+            list_to_plot.append(locals()[variable_name])
+    try:
+        fig.update({'data' : list_to_plot  })
+        st.plotly_chart(fig)
+    except:
+        st.text('choose 5 ')
+comapre_with_year = st.checkbox('compare budget_x and revenue with years')
+if comapre_with_year:
+    compare_multi_column(df)
