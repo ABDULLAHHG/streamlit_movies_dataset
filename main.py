@@ -23,10 +23,10 @@ df = df.dropna()
 df['date_x'] = pd.to_datetime(df['date_x']) 
 df['year'] = df['date_x'].dt.year
 df = df.set_index('date_x')
-<<<<<<< HEAD
+
 st.dataframe(df.sort_values(by = 'budget_x'))
  
-=======
+
 
 
 
@@ -40,7 +40,6 @@ colors.append(color_palette)
 
 
 # Scatter plot for 
->>>>>>> c130e28cc7d4b66bdf52d664d91bebaae46313d9
 def scatter(df):
     df =df.sort_values(by = 'budget_x',ascending = False )
     df = df.iloc[:100,:]
