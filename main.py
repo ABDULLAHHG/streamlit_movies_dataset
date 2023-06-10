@@ -7,6 +7,8 @@ import colorlover as cl
 import plotly.colors as plc
 import colorsys
 
+
+
 # Define the number of colors needed (up to 20,000)
 num_colors = 20000
 
@@ -21,30 +23,36 @@ df = df.dropna()
 df['date_x'] = pd.to_datetime(df['date_x']) 
 df['year'] = df['date_x'].dt.year
 df = df.set_index('date_x')
-st.dataframe(df)
-
- 
-
-colors = ['#7c90db', '#92a8d1', '#a5c4e1', '#f7cac9', '#fcbad3', '#e05b6f', '#f8b195', '#f5b971', '#f9c74f', '#ee6c4d', '#c94c4c', '#589a8e', '#a381b5', '#f8961e', '#4f5d75', '#6b5b95', '#9b59b6', '#b5e7a0', '#a2b9bc', '#b2ad7f', '#679436', '#878f99', '#c7b8ea', '#6f9fd8', '#d64161', '#f3722c', '#f9a828', '#ff7b25', '#7f7f7f']
 
 
+
+
+colors = ['#7c90db', '#92a8d1', '#a5c4e1', '#f7cac9', '#fcbad3', '#e05b6f', '#f8b195', '#f5b971', '#f9c74f',
+          '#ee6c4d', '#c94c4c', '#589a8e', '#a381b5', '#f8961e', '#4f5d75', '#6b5b95', '#9b59b6', '#b5e7a0',
+          '#a2b9bc', '#b2ad7f', '#679436', '#878f99', '#c7b8ea', '#6f9fd8', '#d64161', '#f3722c', '#f9a828',
+          '#ff7b25', '#7f7f7f']
+
+colors.append(color_palette)
+
+
+# Scatter plot for 
 def scatter(df):
-    df =df.sort_values(by = 'budget_x')
+    df =df.sort_values(by = 'budget_x',ascending = False )
     df = df.iloc[:100,:]
     trace1 = go.Scatter(
                         x = df.index,
                         y = df.budget_x,
-                        mode = 'lines',
+                        mode = 'markers',
                         name = 'budget',
-                        marker = dict(color = '#4B0082'),
+                        marker = dict(color = colors[0]),
                         text = df.names)
     
     trace2 = go.Scatter(
                         x = df.index,
                         y = df.revenue,
-                        mode = 'lines+markers',
+                        mode = 'markers',
                         name = 'revenue',
-                        marker = dict(color = '#FFFCA5'),
+                        marker = dict(color = colors[1]),
                         text = df.names)
     
 
@@ -72,7 +80,7 @@ def distribution (df):
                          y = y[0:unique_count],
                          textposition='auto',
                          marker = dict(
-                                        color = color_palette, 
+                                        color = colors, 
                                         line = dict(color = 'black',width = 0.1))
                          ),row = 1 ,col = 1)
     
@@ -81,7 +89,7 @@ def distribution (df):
                     textposition='auto',
                     hoverinfo='label',
                     
-                    marker = dict(colors = color_palette)),row = 1 , col = 2)
+                    marker = dict(colors = colors)),row = 1 , col = 2)
     
 
     fig.update_layout(
@@ -95,18 +103,6 @@ def distribution (df):
     st.plotly_chart(fig)
     st.text( df[column].value_counts().index[:unique_count])
 
-
-def type_of_movie(df):
-    selected_type = st.selectbox('select type of movie' , [i for i in df['genre'].unique()])
-    type_movie = df[df['genre'] == selected_type]
-    st.dataframe(type_movie)
-
-distrobox = st.checkbox('Distroplot for columns')
-if distrobox == 1:
-    distribution(df)
-
-type_of_movie(df)
-st.dataframe(df.year.value_counts())
 
 def compare_multi_column(df):
     layout = dict(title = 'age and Number of Children vs Income', xaxis = dict(title = 'Income' , ticklen = 5))
@@ -130,6 +126,51 @@ def compare_multi_column(df):
         st.plotly_chart(fig)
     except:
         st.text('choose 5 ')
-comapre_with_year = st.checkbox('compare budget_x and revenue with years')
+
+
+def choose_dataframe(df):
+
+    # SideBar 
+    st.sidebar.header('User Input Feature')
+    selected_year = st.sidebar.selectbox('Year' , reversed(sorted(df.year.unique())))
+    
+    # SideBar - type of movies selection
+    unique_values = df[df.year == selected_year]['genre'].str.split(',').explode().str.split().explode().unique()
+    selected_unique = st.sidebar.multiselect('Type Of Movies' ,unique_values,unique_values)
+    pattern = '|'.join(selected_unique)
+    selected_df = df[(df.year == selected_year) & (df.genre.str.contains(pattern))]
+    
+    # Show DataFrame
+    st.text(f'rows : {selected_df.shape[0]} \tcolmns: {selected_df.shape[1]}') 
+    st.dataframe(selected_df)
+
+
+
+
+    # Distroplot for selection dataframe 
+    distrobox = st.checkbox('Distroplot for columns')
+    if distrobox == 1:
+        distribution(selected_df)
+
+
+
+
+
+
+choose_dataframe(df)
+
+comapre_with_year : bool = st.checkbox('compare budget_x and revenue with years')
 if comapre_with_year:
     compare_multi_column(df)
+
+
+
+
+
+
+# Scatter plot for selection dataframe
+scat : bool = st.checkbox('Scatter Plot')
+if scat:
+    scatter(df)
+
+

@@ -1,0 +1,1 @@
+code . & streamlit run main.py &>/dev/null & 
