@@ -10,7 +10,6 @@ df['year'] = df['date_x'].dt.year
 df = df.set_index('date_x')
 st.dataframe(df.sort_values(by = 'budget_x'))
  
-
 def scatter(df):
     df =df.sort_values(by = 'budget_x')
     df = df.iloc[:100,:]
@@ -38,5 +37,14 @@ def scatter(df):
     fig = dict(data = data , layout = layout)
     st.plotly_chart(fig)
 
+# distribution function 
+def dist(df):
+    # Select column
+    x = st.selectbox('select column' , [i for i in df.columns]) 
+    trace = go.pie(
+        x = x,
+        y = x.value_counts().index,
+
+                    )
 
 #scatter(df)
