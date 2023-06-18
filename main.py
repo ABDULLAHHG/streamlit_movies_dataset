@@ -11,7 +11,7 @@ import plotly.colors as plc
 num_colors = 20000
 
 # Generate the color palette
-color_palette = plc.qualitative.Plotly * (num_colors // len(plc.qualitative.Plotly) + 1)
+color_palette = plc.qualitative.Plotly * (num_colors * 1000)
 
 # Trim the color palette to the desired number of colors
 color_palette = color_palette[:num_colors]
@@ -97,7 +97,7 @@ def distribution (df):
 
     
 
-    fig.add_trace(go.Bar(x = sorted(x[min_value:max_value]),
+    fig.add_trace(go.Bar(x = x[min_value:max_value],
                          y = y[min_value:max_value],
                          textposition='auto',
                          marker = dict(
@@ -157,10 +157,18 @@ def choose_dataframe(df):
     
     # SideBar - type of movies selection
     unique_values : list = df[df.year == selected_year]['genre'].str.split(',').explode().str.split().explode().unique()
-    selected_unique : list = st.sidebar.multiselect('Type Of Movies' ,unique_values,unique_values)
-    pattern : str = '|'.join(selected_unique)
-    selected_df = df[(df.year == selected_year) & (df.genre.str.contains(pattern))]
+    multi_selected_movies : list = st.sidebar.multiselect('Movies' ,unique_values,unique_values)
+    pattern_movies : str = '|'.join(multi_selected_movies)
+    selected_df = df[(df.year == selected_year) & (df.genre.str.contains(pattern_movies))]
     
+    # SideBar - country selection
+    country = sorted(df.country.unique())
+    multi_selected_country : list = st.sidebar.multiselect('Countries ' ,country,country)
+    pattern_country : str = '|'.join(multi_selected_country)
+    selected_df = selected_df[(selected_df.country.str.contains(pattern_country))]
+    
+
+
     # Show DataFrame
     st.text(f'rows : {selected_df.shape[0]} \tcolmns: {selected_df.shape[1]}') 
     st.dataframe(selected_df.sort_index())
