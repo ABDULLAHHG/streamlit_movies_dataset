@@ -3,9 +3,7 @@ import streamlit as st
 import numpy as np 
 import plotly.graph_objects as go 
 from plotly.subplots import make_subplots 
-import colorlover as cl
 import plotly.colors as plc
-import colorsys
 
 
 
@@ -18,20 +16,23 @@ color_palette = plc.qualitative.Plotly * (num_colors // len(plc.qualitative.Plot
 # Trim the color palette to the desired number of colors
 color_palette = color_palette[:num_colors]
 
+# Read Dataset
 df = pd.read_csv('imdb_movies.csv')
 df = df.dropna()
+
+
 df['date_x'] = pd.to_datetime(df['date_x']) 
 df['year'] = df['date_x'].dt.year
 df = df.set_index('date_x')
 
-st.dataframe(df.sort_values(by = 'budget_x'))
+
  
 
 
 
 
-
-colors = ['#7c90db', '#92a8d1', '#a5c4e1', '#f7cac9', '#fcbad3', '#e05b6f', '#f8b195', '#f5b971', '#f9c74f',
+# add color 
+colors : list = ['#7c90db', '#92a8d1', '#a5c4e1', '#f7cac9', '#fcbad3', '#e05b6f', '#f8b195', '#f5b971', '#f9c74f',
           '#ee6c4d', '#c94c4c', '#589a8e', '#a381b5', '#f8961e', '#4f5d75', '#6b5b95', '#9b59b6', '#b5e7a0',
           '#a2b9bc', '#b2ad7f', '#679436', '#878f99', '#c7b8ea', '#6f9fd8', '#d64161', '#f3722c', '#f9a828',
           '#ff7b25', '#7f7f7f']
@@ -41,6 +42,7 @@ colors.append(color_palette)
 
 # Scatter plot for 
 def scatter(df):
+    # resize data choose only first 100 
     df =df.sort_values(by = 'budget_x',ascending = False )
     df = df.iloc[:100,:]
     trace1 = go.Scatter(
@@ -80,8 +82,14 @@ def dist(df):
 #scatter(df)
 
 def distribution (df):
+    # Select column to plot 
     column = st.selectbox('select column' , [i for i in df.columns if i != 'names'])
-    unique_count = st.select_slider('select number of unique count',[i for i in range(len(df[column].value_counts())+1)] , len(df[column].value_counts().index)//5)
+    
+    # min and max for unique silder 
+    min_value = st.slider("Minimum value:", 0, (len(df[column].value_counts())+1)//2 , 0)
+    max_value = st.slider("Maximum value:", min_value, len(df[column].value_counts())+1 , (len(df[column].value_counts())+1)//2)
+
+    
     fig = make_subplots(rows = 1 , cols = 2 , subplot_titles=('countplot','percentage'), specs=[[{"type": "xy"}, {'type': 'domain'}]])
     y = df[column].value_counts().values
     x = df[column].value_counts().index
@@ -89,16 +97,16 @@ def distribution (df):
 
     
 
-    fig.add_trace(go.Bar(x = x[0:unique_count],
-                         y = y[0:unique_count],
+    fig.add_trace(go.Bar(x = sorted(x[min_value:max_value]),
+                         y = y[min_value:max_value],
                          textposition='auto',
                          marker = dict(
                                         color = colors, 
                                         line = dict(color = 'black',width = 0.1))
                          ),row = 1 ,col = 1)
     
-    fig.add_trace(go.Pie(values = y[0:unique_count] ,
-                    labels=x[0:unique_count],       
+    fig.add_trace(go.Pie(values = y[min_value:max_value] ,
+                    labels=x[min_value:max_value],       
                     textposition='auto',
                     hoverinfo='label',
                     
@@ -114,7 +122,7 @@ def distribution (df):
                   template = 'plotly_dark')
     
     st.plotly_chart(fig)
-    st.text( df[column].value_counts().index[:unique_count])
+    st.text( df[column].value_counts().index[min_value:max_value])
 
 
 def compare_multi_column(df):
@@ -148,20 +156,20 @@ def choose_dataframe(df):
     selected_year = st.sidebar.selectbox('Year' , reversed(sorted(df.year.unique())))
     
     # SideBar - type of movies selection
-    unique_values = df[df.year == selected_year]['genre'].str.split(',').explode().str.split().explode().unique()
-    selected_unique = st.sidebar.multiselect('Type Of Movies' ,unique_values,unique_values)
-    pattern = '|'.join(selected_unique)
+    unique_values : list = df[df.year == selected_year]['genre'].str.split(',').explode().str.split().explode().unique()
+    selected_unique : list = st.sidebar.multiselect('Type Of Movies' ,unique_values,unique_values)
+    pattern : str = '|'.join(selected_unique)
     selected_df = df[(df.year == selected_year) & (df.genre.str.contains(pattern))]
     
     # Show DataFrame
     st.text(f'rows : {selected_df.shape[0]} \tcolmns: {selected_df.shape[1]}') 
-    st.dataframe(selected_df)
+    st.dataframe(selected_df.sort_index())
 
 
 
 
     # Distroplot for selection dataframe 
-    distrobox = st.checkbox('Distroplot for columns')
+    distrobox : bool = st.checkbox('Distroplot for columns')
     if distrobox == 1:
         distribution(selected_df)
 
