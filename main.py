@@ -55,10 +55,10 @@ def scatter(df):
     
 
     data = [trace1 ,trace2]
-    layout = dict(title = 'budget and revenue vs time' ,
-                  xaxis = dict (title = 'time year - month - day',ticklen = 5 , zeroline = False),
-                  
-                  )
+
+    # Set the layout of the plot
+    layout = dict(title='Budget and Revenue vs Time',
+                  xaxis=dict(title='Time Year-Month', ticklen=5, zeroline=False))
     fig = dict(data = data , layout = layout)
     st.plotly_chart(fig)
 
@@ -189,14 +189,15 @@ def choose_dataframe(df):
     st.header('Streamlit movies EDA')
     
     # text 
-    st.subheader('User Input datases')
-    
+    st.subheader('User Input Dataset  (User Input Feature) ')
+
     # Show DataFrame
     st.text(f'rows : {selected_df.shape[0]} \tcolmns: {selected_df.shape[1]}') 
     st.dataframe(selected_df.sort_index())
 
 
-
+    # subheader 2 
+    st.subheader('Plots')
 
     # Distroplot for selection dataframe 
     distrobox : bool = st.checkbox('Distroplot for columns (User Input Feature)')
