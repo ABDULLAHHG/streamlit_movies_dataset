@@ -64,7 +64,8 @@ def scatter(df):
 
     data = [trace1 ,trace2]
     layout = dict(title = 'budget and revenue vs time' ,
-                  xaxis = dict (title = 'time year - month - day',ticklen = 5 , zeroline = False)
+                  xaxis = dict (title = 'time year - month - day',ticklen = 5 , zeroline = False),
+                  
                   )
     fig = dict(data = data , layout = layout)
     st.plotly_chart(fig)
@@ -112,6 +113,7 @@ def distribution (df):
                     
                     marker = dict(colors = colors)),row = 1 , col = 2)
     
+    fig.update_traces(col = 1,row =1 ,showlegend=False)
 
     fig.update_layout(
         title = {'text' : f'Distribution of the {column}',
@@ -119,7 +121,11 @@ def distribution (df):
                  'x' : 0.5,
                  'xanchor' : 'center',
                   'yanchor' : 'top'},
-                  template = 'plotly_dark')
+                  template = 'plotly_dark',
+                  height = 600,
+                  width = 800
+                  
+                  )
     
     st.plotly_chart(fig)
     st.text( df[column].value_counts().index[min_value:max_value])
