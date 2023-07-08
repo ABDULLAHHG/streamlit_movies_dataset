@@ -90,14 +90,14 @@ def distribution (df):
     min_value = st.slider("Minimum value:", 0, (len(df[column].value_counts())+1)//2 , 0)
     max_value = st.slider("Maximum value:", min_value, len(df[column].value_counts())+1 , (len(df[column].value_counts())+1)//2)
 
-    
+    # Create subplot of 1X2 row = 1 and col = 2 
     fig = make_subplots(rows = 1 , cols = 2 , subplot_titles=('countplot','percentage'), specs=[[{"type": "xy"}, {'type': 'domain'}]])
     y = df[column].value_counts().values
     x = df[column].value_counts().index
 
 
     
-
+    # Bar Plot
     fig.add_trace(go.Bar(x = x[min_value:max_value],
                          y = y[min_value:max_value],
                          textposition='auto',
@@ -106,6 +106,7 @@ def distribution (df):
                                         line = dict(color = 'black',width = 0.1))
                          ),row = 1 ,col = 1)
     
+    # Piechart Plot
     fig.add_trace(go.Pie(values = y[min_value:max_value] ,
                     labels=x[min_value:max_value],       
                     textposition='auto',
@@ -113,6 +114,7 @@ def distribution (df):
                     
                     marker = dict(colors = colors)),row = 1 , col = 2)
     
+    # Update Bar remove its legend 
     fig.update_traces(col = 1,row =1 ,showlegend=False)
 
     fig.update_layout(
@@ -132,27 +134,40 @@ def distribution (df):
 
 
 def compare_multi_column(df):
-    layout = dict(title = 'age and Number of Children vs Income', xaxis = dict(title = 'Income' , ticklen = 5))
-    list_to_plot = []
-    fig = dict(layout = layout)
+    # Define layout of the plot
+    layout = dict(title='Revenue vs Income',
+              height=600,
+              width=800,
+              xaxis=dict(title='Income', ticklen=5),
+              yaxis=dict(title='Revenue', ticklen=5))
+    
+    # Create dictionary to store plots
+    plots = {}
 
-    for c ,i in enumerate(sorted(df.year.value_counts().index[0:11] , reverse=True)):
-        checkbox = st.checkbox(str(i))
+    fig = dict(layout = layout)
+    
+    # Iterate over the top 10 most frequent values in the `year` column
+    for i, year in zip(range(10), sorted(df.year.value_counts().index[:10], reverse=True)):
+        checkbox = st.checkbox(str(year))
         if checkbox:
-            variable_name = f"{i}"
-            locals()[variable_name] = go.Scatter(
-                x = df[df.year == i]['budget_x'] ,
-                y = df[df.year == i]['revenue'] ,
-                mode = 'markers',
-                name = f'{i}',
-                marker = dict(color = colors[c]))
+        # Create plot and add to dictionary
+            plots[year] = go.Scatter(x=df[df.year == year]['budget_x'],
+                                 y=df[df.year == year]['revenue'],
+                                 mode='markers',
+                                 name=str(year),
+                                 marker=dict(color=colors[i]))
             
-            list_to_plot.append(locals()[variable_name])
-    try:
-        fig.update({'data' : list_to_plot  })
+    # Create list of plots to display
+    list_to_plot = list(plots.values())
+
+    # Create figure with layout and list of plots
+    fig = dict(layout=layout, data=list_to_plot)
+
+    # Display plot if at least one checkbox is selected
+    if len(plots) > 0:
         st.plotly_chart(fig)
-    except:
-        st.text('choose 5 ')
+    else:
+        st.text('Choose a year to display')
 
 
 def choose_dataframe(df):
