@@ -186,11 +186,45 @@ def profit_movies_type(df):
                 yaxis_title = 'Revenue and Budget'
     )
 
+def genre_count(df , selected_df):
+    # split the genre into deblicate (df)
+    df.genre = df.genre.str.split(',') 
+    df = df.explode('genre')
+    df.genre = df.genre.str.strip() 
+
+    # split the genre into deblicate rows (selected_df)
+    selected_df.genre = selected_df.genre.str.split(',') 
+    selected_df = selected_df.explode('genre')
+    selected_df.genre = selected_df.genre.str.strip() 
+
+
+
+    fig = make_subplots(rows = 1 ,cols = 1)
+        # Bar for Budget
+    fig.add_trace(go.Bar(
+               x = df.genre.value_counts().index,
+               y = selected_df.genre.value_counts().values,
+               name = str(selected_df.year[0])         
+    ),row = 1 ,col = 1)
+
+    # Bar for Revenue
+    fig.add_trace(go.Bar(
+               x = df.genre.value_counts().index,
+               y = df.genre.value_counts().values,
+               name = 'All Years'         
+    ),row = 1 ,col = 1)
+
+        # Set layout of the plot 
+    fig.update_layout(
+                height = 600,
+                width = 800,
+                title = f'Movie Genre Analysis: Genre counts VS {str(selected_df.year[0]) } VS All Years',
+                title_x = 0.185,
+                xaxis_title = 'Movie Genres',
+                yaxis_title = 'counts'
+    )
     # Show plot 
-    st.plotly_chart(fig)
-
-
-
+    st.plotly_chart(fig) 
 
 
 def choose_dataframe(df):
@@ -238,7 +272,13 @@ def choose_dataframe(df):
     # Revenue VS budget VS Movies-Type plot for Selection DataFrame
     Bar : bool = st.checkbox('Revenue VS budget VS Movies-Type (User Input Feature)')
     if Bar:
-        profit_movies_type(selected_df)    
+        profit_movies_type(selected_df)
+
+        
+    # Genre counts VS selected year vs all year plot 
+    count_genre_bool : bool = st.checkbox(f'Movie Genre Analysis: Genre counts VS {str(selected_df.year[0]) } VS All Years')
+    if count_genre_bool:    
+        genre_count(df,selected_df)
     
 
 
