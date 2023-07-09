@@ -16,17 +16,8 @@ df['year'] = df['date_x'].dt.year
 df = df.set_index('date_x')
 
 
- 
 
-
-
-
-
-
-
-
-
-# Scatter plot for 
+# Scatter plot time VS Budget and Revenue 
 def scatter(df):
     # Define color palette
     colors = sns.color_palette('deep',n_colors=2).as_hex()
@@ -62,17 +53,8 @@ def scatter(df):
     fig = dict(data = data , layout = layout)
     st.plotly_chart(fig)
 
+
 # distribution function 
-def dist(df):
-    # Select column
-    x = st.selectbox('select column' , [i for i in df.columns]) 
-    trace = go.pie(
-        x = x,
-        y = x.value_counts().index,
-
-                    )
-
-
 def distribution (df):
     # Select column to plot 
     column = st.selectbox('select column' , [i for i in df.columns if i != 'names'])
@@ -82,7 +64,7 @@ def distribution (df):
     max_value = st.slider("Maximum value:", min_value, len(df[column].value_counts())+1 , (len(df[column].value_counts())+1)//2)
 
     # Define color palette
-    colors = sns.color_palette('husl',n_colors=max_value-min_value).as_hex()
+    colors = sns.color_palette('deep',n_colors=max_value-min_value).as_hex()
     
     # Create subplot of 1X2 row = 1 and col = 2 
     fig = make_subplots(rows = 1 , cols = 2 , subplot_titles=('countplot','percentage'), specs=[[{"type": "xy"}, {'type': 'domain'}]])
@@ -99,15 +81,16 @@ def distribution (df):
                                         color = colors, 
                                         line = dict(color = 'black',width = 0.1))
                          ),row = 1 ,col = 1)
-    
+    Pie = st.checkbox('Pie Chart',1)
+    if Pie:
     # Piechart Plot
-    fig.add_trace(go.Pie(values = y[min_value:max_value] ,
-                    labels=x[min_value:max_value],       
-                    textposition='auto',
-                    hoverinfo='label',
-                    
-                    marker = dict(colors = colors)),row = 1 , col = 2)
-    
+        fig.add_trace(go.Pie(values = y[min_value:max_value] ,
+                        labels=x[min_value:max_value],       
+                        textposition='auto',
+                        hoverinfo='label',
+                        
+                        marker = dict(colors = colors)),row = 1 , col = 2)
+        
     # Update Bar remove its legend 
     fig.update_traces(col = 1,row =1 ,showlegend=False)
 
@@ -166,6 +149,40 @@ def compare_multi_column(df):
     else:
         st.text('Choose a year to display')
 
+# plot profit for each movies type 
+def profit_movies_type(df):
+    # split the genre into deblicate rows 
+    df.genre = df.genre.str.split(',') 
+    df = df.explode('genre')
+    df.genre = df.genre.str.strip() 
+
+    # Group by genre and use sum for total Revenue and Budget for each movies type 
+    total_sales = df.groupby('genre').sum()
+
+    # make 1X1 plot make Revenue and Budget in same plot 
+    fig = make_subplots(rows = 1 , cols = 1)
+
+    # Bar for Budget
+    fig.add_trace(go.Bar(
+               x = total_sales.index,
+               y = total_sales.budget_x,
+               name = 'Budget'         
+    ),row = 1 ,col = 1)
+
+    # Bar for Revenue
+    fig.add_trace(go.Bar(
+               x = total_sales.index,
+               y = total_sales.revenue,
+               name = 'Revenue'         
+    ),row = 1 ,col = 1)
+
+
+    # Show plot 
+    st.plotly_chart(fig)
+
+
+
+
 
 def choose_dataframe(df):
 
@@ -173,13 +190,13 @@ def choose_dataframe(df):
     st.sidebar.header('User Input Feature')
     selected_year = st.sidebar.selectbox('Year' , reversed(sorted(df.year.unique())))
     
-    # SideBar - type of movies selection
+    # SideBar - Type of Movies Selection
     unique_values : list = df[df.year == selected_year]['genre'].str.split(',').explode().str.split().explode().unique()
     multi_selected_movies : list = st.sidebar.multiselect('Movies' ,unique_values,unique_values)
     pattern_movies : str = '|'.join(multi_selected_movies)
     selected_df = df[(df.year == selected_year) & (df.genre.str.contains(pattern_movies))]
     
-    # SideBar - country selection
+    # SideBar - Country Selection
     country = sorted(df.country.unique())
     multi_selected_country : list = st.sidebar.multiselect('Countries ' ,country,country)
     pattern_country : str = '|'.join(multi_selected_country)
@@ -188,7 +205,7 @@ def choose_dataframe(df):
     # Header
     st.header('Streamlit movies EDA')
     
-    # text 
+    # SubHeader 1 
     st.subheader('User Input Dataset  (User Input Feature) ')
 
     # Show DataFrame
@@ -196,25 +213,30 @@ def choose_dataframe(df):
     st.dataframe(selected_df.sort_index())
 
 
-    # subheader 2 
+    # SubHeader 2 
     st.subheader('Plots')
 
-    # Distroplot for selection dataframe 
+    # Distroplot for Selection Dataframe 
     distrobox : bool = st.checkbox('Distroplot for columns (User Input Feature)')
     if distrobox == 1:
         distribution(selected_df)
 
-    # Scatter plot for selection dataframe
+    # Scatter plot for Selection dataframe
     scat : bool = st.checkbox('Scatter Plot (User Input Feature)')
     if scat:
         scatter(selected_df)
 
-
+    # Scatter plot for Selection dataframe
+    Bar : bool = st.checkbox('Revenue VS budget VS Movies-Type (User Input Feature)')
+    if Bar:
+        profit_movies_type(selected_df)    
+    
 
 
 
 
 choose_dataframe(df)
+
 
 comapre_with_year : bool = st.checkbox('compare budget_x and revenue with years')
 if comapre_with_year:
