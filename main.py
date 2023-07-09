@@ -59,12 +59,12 @@ def distribution (df):
     # Select column to plot 
     column = st.selectbox('select column' , [i for i in df.columns if i != 'names'])
 
-    # min and max for unique silder 
-    min_value = st.slider("Minimum value:", 0, (len(df[column].value_counts())+1)//2 , 0)
-    max_value = st.slider("Maximum value:", min_value, len(df[column].value_counts())+1 , (len(df[column].value_counts())+1)//2)
+    # Min and Max 
+    min_index = st.slider("Minimum value:", 0, (len(df[column].value_counts())+1)//2 , 0)
+    max_index = st.slider("Maximum value:", min_index, len(df[column].value_counts())+1 , (len(df[column].value_counts())+1)//2)
 
     # Define color palette
-    colors = sns.color_palette('deep',n_colors=max_value-min_value).as_hex()
+    colors = sns.color_palette('deep',n_colors=max_index-min_index).as_hex()
     
     # Create subplot of 1X2 row = 1 and col = 2 
     fig = make_subplots(rows = 1 , cols = 2 , subplot_titles=('countplot','percentage'), specs=[[{"type": "xy"}, {'type': 'domain'}]])
@@ -74,8 +74,8 @@ def distribution (df):
 
     
     # Bar Plot
-    fig.add_trace(go.Bar(x = x[min_value:max_value],
-                         y = y[min_value:max_value],
+    fig.add_trace(go.Bar(x = x[min_index:max_index],
+                         y = y[min_index:max_index],
                          textposition='auto',
                          marker = dict(
                                         color = colors, 
@@ -84,8 +84,8 @@ def distribution (df):
     Pie = st.checkbox('Pie Chart',1)
     if Pie:
     # Piechart Plot
-        fig.add_trace(go.Pie(values = y[min_value:max_value] ,
-                        labels=x[min_value:max_value],       
+        fig.add_trace(go.Pie(values = y[min_index:max_index] ,
+                        labels=x[min_index:max_index],       
                         textposition='auto',
                         hoverinfo='label',
                         
@@ -107,7 +107,7 @@ def distribution (df):
                   )
     
     st.plotly_chart(fig)
-    st.text( df[column].value_counts().index[min_value:max_value])
+    st.text( df[column].value_counts().index[min_index:max_index])
 
 
 def compare_multi_column(df):
@@ -159,7 +159,7 @@ def profit_movies_type(df):
     # Group by genre and use sum for total Revenue and Budget for each movies type 
     total_sales = df.groupby('genre').sum()
 
-    # make 1X1 plot make Revenue and Budget in same plot 
+    # make 1X1 plot to make Revenue and Budget in same plot 
     fig = make_subplots(rows = 1 , cols = 1)
 
     # Bar for Budget
@@ -176,6 +176,15 @@ def profit_movies_type(df):
                name = 'Revenue'         
     ),row = 1 ,col = 1)
 
+    # Set layout of the plot 
+    fig.update_layout(
+                height = 600,
+                width = 800,
+                title = 'Movie Genre Analysis: Comparing Total Revenue and Budget',
+                title_x = 0.185,
+                xaxis_title = 'Movie Genres',
+                yaxis_title = 'Revenue and Budget'
+    )
 
     # Show plot 
     st.plotly_chart(fig)
@@ -216,17 +225,17 @@ def choose_dataframe(df):
     # SubHeader 2 
     st.subheader('Plots')
 
-    # Distroplot for Selection Dataframe 
+    # Distroplot for Selection DataFrame 
     distrobox : bool = st.checkbox('Distroplot for columns (User Input Feature)')
     if distrobox == 1:
         distribution(selected_df)
 
-    # Scatter plot for Selection dataframe
+    # Scatter plot for Selection DataFrame
     scat : bool = st.checkbox('Scatter Plot (User Input Feature)')
     if scat:
         scatter(selected_df)
 
-    # Scatter plot for Selection dataframe
+    # Revenue VS budget VS Movies-Type plot for Selection DataFrame
     Bar : bool = st.checkbox('Revenue VS budget VS Movies-Type (User Input Feature)')
     if Bar:
         profit_movies_type(selected_df)    
