@@ -290,9 +290,9 @@ def choose_dataframe(df):
 choose_dataframe(df)
 
 
-comapre_with_year : bool = st.checkbox('compare budget_x and revenue with years')
-if comapre_with_year:
-    compare_multi_column(df)
+# comapre_with_year : bool = st.checkbox('compare budget_x and revenue with years')
+# if comapre_with_year:
+#     compare_multi_column(df)
 
 # Revenue VS budget VS Movies-Type plot for Selection DataFrame
 RVSB_full_data : bool = st.checkbox('Revenue VS budget VS Movies-Type')
