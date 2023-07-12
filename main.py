@@ -188,7 +188,7 @@ def profit_movies_type(df):
 
     # Show plot 
     st.plotly_chart(fig)
-    
+
 def genre_count(df , selected_df):
     # split the genre into deblicate (df)
     df.genre = df.genre.str.split(',') 
@@ -298,12 +298,6 @@ if comapre_with_year:
 RVSB_full_data : bool = st.checkbox('Revenue VS budget VS Movies-Type')
 if RVSB_full_data:
     profit_movies_type(df)    
-<<<<<<< HEAD
-=======
-
-
-
->>>>>>> origin/main
 
 
 
