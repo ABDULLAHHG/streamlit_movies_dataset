@@ -66,8 +66,16 @@ def distribution (df):
     # Define color palette
     colors = sns.color_palette('deep',n_colors=max_index-min_index).as_hex()
     
+    # create a checkbox widget labeled 'Pie Chart' with a default value of 1
+    Pie = st.checkbox('Pie Chart',1)
+
+
     # Create subplot of 1X2 row = 1 and col = 2 
-    fig = make_subplots(rows = 1 , cols = 2 , subplot_titles=('countplot','percentage'), specs=[[{"type": "xy"}, {'type': 'domain'}]])
+    if Pie:
+        fig = make_subplots(rows = 1 , cols = 2 , subplot_titles=('countplot','percentage'), specs=[[{"type": "xy"}, {'type': 'domain'}]])
+    else:
+        fig = make_subplots(rows = 1 , cols = 1 , subplot_titles=['Countplot'])
+    
     y = df[column].value_counts().values
     x = df[column].value_counts().index
 
@@ -81,7 +89,6 @@ def distribution (df):
                                         color = colors, 
                                         line = dict(color = 'black',width = 0.1))
                          ),row = 1 ,col = 1)
-    Pie = st.checkbox('Pie Chart',1)
     if Pie:
     # Piechart Plot
         fig.add_trace(go.Pie(values = y[min_index:max_index] ,
@@ -109,7 +116,7 @@ def distribution (df):
     st.plotly_chart(fig)
     st.text( df[column].value_counts().index[min_index:max_index])
 
-
+# Not being used Right now 
 def compare_multi_column(df):
     # Define color palette
     colors = sns.color_palette('deep',n_colors=10).as_hex()
@@ -203,7 +210,8 @@ def genre_count(df , selected_df):
 
 
     fig = make_subplots(rows = 1 ,cols = 1)
-        # Bar for Budget
+    
+    # Bar for Budget
     fig.add_trace(go.Bar(
                x = df.genre.value_counts().index,
                y = selected_df.genre.value_counts().values,
@@ -217,7 +225,7 @@ def genre_count(df , selected_df):
                name = 'All Years'         
     ),row = 1 ,col = 1)
 
-        # Set layout of the plot 
+    # Set layout of the plot 
     fig.update_layout(
                 height = 600,
                 width = 800,
@@ -294,7 +302,7 @@ choose_dataframe(df)
 # if comapre_with_year:
 #     compare_multi_column(df)
 
-# Revenue VS budget VS Movies-Type plot for Selection DataFrame
+# Revenue VS budget VS Movies-Type plot
 RVSB_full_data : bool = st.checkbox('Revenue VS budget VS Movies-Type')
 if RVSB_full_data:
     profit_movies_type(df)    

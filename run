@@ -3,9 +3,9 @@
 # Check if code-server command exists
 if which code-server &> /dev/null
 then
-    # If it does, execute the mobile command
+    # If it does, execute the Mobile command
     code-server &> /dev/null & streamlit run main.py &> /dev/null &
 else
-    # If it doesn't, execute the pc command
+    # If it doesn't, execute the PC command
     code . & streamlit run main.py &> /dev/null &
 fi
